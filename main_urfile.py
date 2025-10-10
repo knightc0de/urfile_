@@ -27,7 +27,7 @@ class Urfile_():
           except Exception:
               self.results["file type"] = "Unknown (magic unavailable)"
 
-      def detecting_binary(self.path):
+      def detecting_binary(self):
           with open(self.path,"rb")as f :
                header  = f.read(64)
  # ;; Windows EXE ;;
@@ -62,4 +62,31 @@ class Urfile_():
 # ;; HTML ;; 
           else:
               try:
-                  with 
+                  with open(self.path,"r",encoding="utf-8",error="ignore") as f :
+                       content = f.read(2048).lower() 
+                       if "<html" in content or "<!doctype html" in content:
+                           self.results["file_type"] = "HTML Document"
+                           self.results["encoding"] = "UTF-8"
+                           self.results["language"] = "HTML"
+                           self.results["exceutable"] = False 
+              except Exception:
+                   pass 
+# ;; Text / Encoding Detection ;; 
+          if self.results["file_type"].startswith("Unknown"):
+             try:
+                 with open(self.path,"rb") as f:
+                     data = f.read(2048)   
+                 if all(32 <= b < 127 or b in (9,10,13) for b in data):
+                    self.results["file_type"] = "ASCII Text"
+                    self.results["encoding"]  = "ASCII"
+                 elif b'\x00' not in data:
+                     try:
+                         data.decode("utf-8")
+                         self.results["file_type"] = "UTF-8 Text File"
+                         self.results["encoding"] = "UTF-8"
+                     except UnicodeDecodeError:
+                          pass 
+             except Exception:
+                 pass 
+             
+
