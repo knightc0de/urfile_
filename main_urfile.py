@@ -114,5 +114,42 @@ class Urfile_():
                           pass 
              except Exception:
                  pass 
-             
+
+          p = Path(self.path)  
+          ext = p.suffix.lower()  
+
+          if ext in [".py"]:
+               self.results["language"] = "Python"
+          elif ext in [".c"]:
+               self.results["language"] = "C"
+          elif ext in [".cpp", ".cc", ".cxx"]:
+               self.results["language"] = "C++"
+          elif ext in [".html", ".htm"]:
+               self.results["language"] = "HTML"
+          elif ext in [".js"]:
+               self.results["language"] = "JavaScript"
+          elif ext in [".java"]:
+               self.results["language"] = "Java"
+          elif ext in [".sh"]:
+               self.results["language"] = "Shell Script"
+          elif ext in [".php"]:
+               self.result["language"] = "PHP"
+          else:
+# file content
+             try:
+               with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read(2048)
+                    if "def " in content and "import " in content:
+                        self.results["language"] = "Python"
+                    elif "#include" in content and "int main" in content:
+                        self.results["language"] = "C/C++"
+                    elif "function " in content and "console.log" in content:
+                        self.results["language"] = "JavaScript"
+                    elif "<?php" in content:
+                         self.results["language"] = "PHP"
+                    elif "class " in content and "public static void main" in content:
+                         self.results["language"] = "Java"
+             except Exception:
+                 pass
+
 
