@@ -1,7 +1,8 @@
 from  argparse import ArgumentParser,FileType
 from pathlib import Path 
-import sys 
+import zipfile
 import magic 
+import sys
 import os 
 import struct 
 
@@ -33,7 +34,7 @@ class Urfile_():
  # ;; Windows EXE ;;
           if header[:2] == b"MZ":
              self.results["file_type"] = "Windows PE" 
-             self.results["exceutable"] = True 
+             self.results["executable"] = True 
              with open(self.path,"rb") as f :
                   data = f.read()
                   offset = struct.unpack("<I",data[0x3C:0x40])[0]
@@ -48,9 +49,9 @@ class Urfile_():
 # ;; Linux ELF ;; 
           elif header[:4] == b"\x7fELF":
                self.results["file_type"]  = "Linux ElF Executable"
-               self.results["exceutable"] = True 
+               self.results["executable"] = True 
                bit_format = header[4]
-               self.results("architecture") = "32-bit" if bit_format  == 1 else "64=bit"
+               self.results["architecture"] = "32-bit" if bit_format  == 1 else "64=bit"
 # ;; MacOS ;; 
           elif header[:4] in [
                b"\xFE\xED\xFA\xCE" , b"\xCE\xFA\xED\xFE",
@@ -59,6 +60,28 @@ class Urfile_():
                self.results["file_type"] = "macOs Mach-O Exceutable"
                self.results["exceutable"]  = True 
                self.results["architecture"] = "64-bit" if header[:4] in [b"\xFE\xED\xFA\xCF", b"\xCF\xFA\xED\xFE"] else "32-bit"
+
+
+ # ;; Android APK  ;;
+          elif zipfile.is_zipfile(self.path):
+            try:
+                with zipfile.ZipFile(self.path, "r") as z:
+                    if "AndroidManifest.xml" in z.namelist():
+                        self.results["file_type"] = "Android APK"
+                        self.results["executable"] = False
+                        self.results["language"] = "Android Package"
+            except Exception:
+                pass
+
+           
+# ;; Linux Shared Object (.so) ;;
+          elif self.path.lower().endswith(".so"):
+             if header[:4] == b"\x7fELF":
+                self.results["file_type"] = "Linux Shared Object (.so)"
+                self.results["executable"] = True
+                bit_format = header[4]
+                self.results["architecture"] = "32-bit" if bit_format == 1 else "64-bit"
+
 # ;; HTML ;; 
           else:
               try:
@@ -71,6 +94,9 @@ class Urfile_():
                            self.results["exceutable"] = False 
               except Exception:
                    pass 
+              
+      
+
 # ;; Text / Encoding Detection ;; 
           if self.results["file_type"].startswith("Unknown"):
              try:
