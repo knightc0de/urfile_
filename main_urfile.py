@@ -157,4 +157,6 @@ class Urfile_():
           if any(word in self.results["file_type"].lower() for word in ["executable", "pe", "elf", "mach-o"]):
              self.results["is_executable"] = True
 
+          return self.results
+
 
