@@ -3,7 +3,6 @@ from pathlib import Path
 import zipfile
 import magic 
 import sys
-import os 
 import struct 
 
 results = {
