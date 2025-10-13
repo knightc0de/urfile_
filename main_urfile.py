@@ -10,7 +10,7 @@ results = {
            "architecture" : "Unknown", 
            "executable"   : "False",
            "encoding"     :  "Unknown",
-           "language"     : "Unknown"
+           "language"     : "Unknown",
 }
 
 class Urfile_():
@@ -158,4 +158,6 @@ class Urfile_():
 
           return self.results
 
+if __name__ == "__main__":
+     
 
