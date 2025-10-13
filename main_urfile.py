@@ -30,6 +30,7 @@ class Urfile_():
       def detecting_binary(self):
           with open(self.path,"rb")as f :
                header  = f.read(64)
+
  # ;; Windows EXE ;;
           if header[:2] == b"MZ":
              self.results["file_type"] = "Windows PE" 
@@ -40,11 +41,11 @@ class Urfile_():
                   if data[offset:offset+4] == b"PE\0\0":
                        machine = struct.unpack("<H", data[offset+4:offset+6])[0]
                        if machine == 0x14c:
-                          self.result["architecture"] = "32-bit (x86)"
+                          self.results["architecture"] = "32-bit (x86)"
                        elif machine == 0x8664:
-                            self.result["architecture"] = "64-bit (x64)"
+                            self.results["architecture"] = "64-bit (x64)"
                        else:
-                          self.result["architecture"] = f"Unknown (machine={hex(machine)})"
+                          self.results["architecture"] = f"Unknown (machine={hex(machine)})"
 # ;; Linux ELF ;; 
           elif header[:4] == b"\x7fELF":
                self.results["file_type"]  = "Linux ElF Executable"
@@ -132,7 +133,7 @@ class Urfile_():
           elif ext in [".sh"]:
                self.results["language"] = "Shell Script"
           elif ext in [".php"]:
-               self.result["language"] = "PHP"
+               self.results["language"] = "PHP"
           else:
 # file content
              try:
@@ -154,10 +155,13 @@ class Urfile_():
        
 # ;; Executable fallback ;; 
           if any(word in self.results["file_type"].lower() for word in ["executable", "pe", "elf", "mach-o"]):
-             self.results["is_executable"] = True
+             self.results["executable"] = True
 
           return self.results
-
 if __name__ == "__main__":
+     file =  Urfile_("urfile.py")
+     file.file_type()
+     file  = file.detecting_binary()
+     print(file)
      
 
