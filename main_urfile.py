@@ -22,6 +22,7 @@ class Urfile_():
           try:
                m = magic.Magic(mime=False)
                ftype = m.from_file(self.path)
+               ftype = ftype.split(",")[0].strip()
                self.results["file_type"] = ftype
           
           except Exception:
@@ -98,12 +99,11 @@ class Urfile_():
       
 
 # ;; Text / Encoding Detection ;; 
-          if self.results["file_type"].startswith("Unknown"):
+          if self.results["encoding"].startswith("Unknown"):
              try:
                  with open(self.path,"rb") as f:
                      data = f.read(2048)   
                  if all(32 <= b < 127 or b in (9,10,13) for b in data):
-                    self.results["file_type"] = "ASCII Text"
                     self.results["encoding"]  = "ASCII"
                  elif b'\x00' not in data:
                      try:
@@ -124,8 +124,6 @@ class Urfile_():
                self.results["language"] = "C"
           elif ext in [".cpp", ".cc", ".cxx"]:
                self.results["language"] = "C++"
-          elif ext in [".html", ".htm"]:
-               self.results["language"] = "HTML"
           elif ext in [".js"]:
                self.results["language"] = "JavaScript"
           elif ext in [".java"]:
@@ -159,9 +157,8 @@ class Urfile_():
 
           return self.results
 if __name__ == "__main__":
-     file =  Urfile_("urfile.py")
+     file =  Urfile_("test.txt")
      file.file_type()
      file  = file.detecting_binary()
-     print(file)
-     
-
+     for k, v in file.items():
+         print(f"{k:15}: {v}")
