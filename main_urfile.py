@@ -22,6 +22,8 @@ class Urfile_():
           try:
                m = magic.Magic(mime=False)
                ftype = m.from_file(self.path)
+               if self.path.endswith(".py"):
+                  self.results["file_type"] = "Python Script"
                ftype = ftype.split(",")[0].strip()
                self.results["file_type"] = ftype
           
@@ -154,11 +156,12 @@ class Urfile_():
 # ;; Executable fallback ;; 
           if any(word in self.results["file_type"].lower() for word in ["executable", "pe", "elf", "mach-o"]):
              self.results["executable"] = True
-
+          
           return self.results
+
 if __name__ == "__main__":
-     file =  Urfile_("test.txt")
+     file =  Urfile_("urfile.py")
      file.file_type()
-     file  = file.detecting_binary()
-     for k, v in file.items():
+     results = file.detecting_binary()
+     for k, v in results.items():
          print(f"{k:15}: {v}")
