@@ -22,11 +22,26 @@ class Urfile_():
           try:
                m = magic.Magic(mime=False)
                ftype = m.from_file(self.path)
-               if self.path.endswith(".py"):
-                  self.results["file_type"] = "Python Script"
                ftype = ftype.split(",")[0].strip()
                self.results["file_type"] = ftype
-          
+               ext = Path(self.path).suffix.lower()
+               if ext == ".py":
+                      self.results["file_type"] = "Python Script"
+               elif ext == ".c":
+                      self.results["file_type"] = "C Source File"
+               elif ext in [".cpp", ".cc", ".cxx"]:
+                      self.results["file_type"] = "C++ Source File"
+               elif ext == ".sh":
+                      self.results["file_type"] = "Shell Script"
+               elif ext == ".html" or ext == ".htm":
+                      self.results["file_type"] = "HTML Document"
+               elif ext == ".php":
+                      self.results["file_type"] = "PHP Script"
+               elif ext == ".js":
+                     self.results["file_type"] = "JavaScript File"
+               elif ext == ".java":
+                     self.results["file_type"] = "Java Source File"
+             
           except Exception:
               self.results["file type"] = "Unknown (magic unavailable)"
 
@@ -118,25 +133,8 @@ class Urfile_():
                  pass 
 
           p = Path(self.path)  
-          ext = p.suffix.lower()  
-
-          if ext in [".py"]:
-               self.results["language"] = "Python"
-          elif ext in [".c"]:
-               self.results["language"] = "C"
-          elif ext in [".cpp", ".cc", ".cxx"]:
-               self.results["language"] = "C++"
-          elif ext in [".js"]:
-               self.results["language"] = "JavaScript"
-          elif ext in [".java"]:
-               self.results["language"] = "Java"
-          elif ext in [".sh"]:
-               self.results["language"] = "Shell Script"
-          elif ext in [".php"]:
-               self.results["language"] = "PHP"
-          else:
 # file content
-             try:
+          try:
                with open(p, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read(2048)
                     if "def " in content and "import " in content:
@@ -149,7 +147,7 @@ class Urfile_():
                          self.results["language"] = "PHP"
                     elif "class " in content and "public static void main" in content:
                          self.results["language"] = "Java"
-             except Exception:
+          except Exception:
                  pass
 
        
@@ -160,7 +158,7 @@ class Urfile_():
           return self.results
 
 if __name__ == "__main__":
-     file =  Urfile_("urfile.py")
+     file =  Urfile_("")
      file.file_type()
      results = file.detecting_binary()
      for k, v in results.items():
