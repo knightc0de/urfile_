@@ -157,9 +157,21 @@ class Urfile_():
           
           return self.results
 
+def main():
+  parser = ArgumentParser(description="File Analyzer")
+  parser.add_argument("file",type=Path,help="Path of your file ")
+  args =  parser.parse_args()
+  if not args.file.exists():
+        print(f"Error: File '{args.file}' not found.")
+        return
+ 
+  file = Urfile_(str(args.file))
+  file.file_type() 
+  results = file.detecting_binary() 
+
+
+
+
+
 if __name__ == "__main__":
-     file =  Urfile_("")
-     file.file_type()
-     results = file.detecting_binary()
-     for k, v in results.items():
-         print(f"{k:15}: {v}")
+
