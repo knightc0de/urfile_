@@ -123,8 +123,9 @@ class Urfile_():
                     self.results["encoding"]  = "ASCII"
                  elif b'\x00' not in data:
                      try:
-                         data.decode("utf-8")
-                         self.results["file_type"] = "UTF-8 Text File"
+                         data.decode("utf-8")                      
+                         if self.results["file_type"] == "Unknown":
+                            self.results["file_type"] = "UTF-8 Text File"
                          self.results["encoding"] = "UTF-8"
                      except UnicodeDecodeError:
                           pass 
