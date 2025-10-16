@@ -169,9 +169,10 @@ def main():
   file.file_type() 
   results = file.detecting_binary() 
 
-
+  for k, v in results.items():
+    print(f"{k:15}: {v}")
 
 
 
 if __name__ == "__main__":
-
+   main()
