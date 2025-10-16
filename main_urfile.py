@@ -2,7 +2,6 @@ from  argparse import ArgumentParser,FileType
 from pathlib import Path 
 import zipfile
 import magic 
-import sys
 import struct 
 
 results = {
@@ -31,7 +30,7 @@ class Urfile_():
                       self.results["file_type"] = "C Source File"
                elif ext in [".cpp", ".cc", ".cxx"]:
                       self.results["file_type"] = "C++ Source File"
-               elif ext == ".sh":
+               elif ext in [".sh",".bash",".zsh"]:
                       self.results["file_type"] = "Shell Script"
                elif ext == ".html" or ext == ".htm":
                       self.results["file_type"] = "HTML Document"
