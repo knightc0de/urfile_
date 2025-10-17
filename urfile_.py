@@ -98,6 +98,18 @@ class Urfile_():
                 self.results["executable"] = True
                 bit_format = header[4]
                 self.results["architecture"] = "32-bit" if bit_format == 1 else "64-bit"
+# ;; zip (file );; 
+          elif  header.startswith(b"PK\x03\x04"):
+               self.results["file_type"] = "ZIP Archive"
+               self.results["executable"] = False
+
+# ;; 7-Zip ;;
+          elif header.startswith(b"7z\xBC\xAF\x27\x1C"):
+               self.results["file_type"] = "7z Archive"
+               self.results["executable"] = False
+
+
+
 
 # ;; HTML ;; 
           else:
