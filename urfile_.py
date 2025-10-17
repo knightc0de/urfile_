@@ -98,7 +98,7 @@ class Urfile_():
                 self.results["executable"] = True
                 bit_format = header[4]
                 self.results["architecture"] = "32-bit" if bit_format == 1 else "64-bit"
-# ;; zip (file );; 
+# ;; zip (file);; 
           elif  header.startswith(b"PK\x03\x04"):
                self.results["file_type"] = "ZIP Archive"
                self.results["executable"] = False
@@ -108,7 +108,17 @@ class Urfile_():
                self.results["file_type"] = "7z Archive"
                self.results["executable"] = False
 
+# ;; RAR ;;
+          elif header.startswith(b"Rar!\x1A\x07\x00"):
+               self.results["file_type"] = "RAR Archive"
+               self.results["executable"] = False
 
+# ;; GZIP ;; 
+          elif header.startswith(b"\x1F\x8B\x08"):
+               self.result["file_type"] = "GZIP Archive (.gz)"
+               self.results["executable"] = False
+
+# ;;     
 
 
 # ;; HTML ;; 
