@@ -118,7 +118,18 @@ class Urfile_():
                self.result["file_type"] = "GZIP Archive (.gz)"
                self.results["executable"] = False
 
-# ;;     
+
+# ;; BZIP2 ;;
+          elif header.startswith(b"BZh"):
+               self.results["file_type"] = "BZIP2 Archive (.bz2)"
+               self.results["executable"] = False
+# ;; TAR ;;
+          elif self.path.lower().endswith(".tar"):
+             with open(self.path, "rb") as f:
+                  data = f.read(512)
+                  if b"ustar" in data:
+                     self.results["file_type"] = "TAR Archive"
+                     self.results["executable"] = False    
 
 
 # ;; HTML ;; 
