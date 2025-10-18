@@ -1,5 +1,6 @@
 from  argparse import ArgumentParser
 from pathlib import Path 
+import lief 
 import zipfile
 import magic 
 import struct 
@@ -115,7 +116,7 @@ class Urfile_():
 
 # ;; GZIP ;; 
           elif header.startswith(b"\x1F\x8B\x08"):
-               self.result["file_type"] = "GZIP Archive (.gz)"
+               self.results["file_type"] = "GZIP Archive (.gz)"
                self.results["executable"] = False
 
 
@@ -189,6 +190,49 @@ class Urfile_():
              self.results["executable"] = True
           
           return self.results
+      
+#;; protection & linking analysis ;; 
+
+def detect_protection(file):
+      protections = {
+          "pie": False,
+          "nx": None,
+          "relro": "None",
+          "canary": False,
+          "aslr": False,
+          "packed": False,
+          "stripped": None,
+          "linking": None,
+           }
+
+      try:
+          binary = lief.parse(file)
+          if not binary:
+           return protections
+
+          ftype = binary.format.name  
+
+# ;; Linux Elf ;; 
+          if ftype == "ELF":
+               elf = binary
+               protections["pie"] = elf.is_pie
+               protections["aslr"] = elf.is_pie
+               protections["nx"] = elf.has_nx
+               protections["canary"] = "__stack_chk_fail" in [s.name for s in elf.symbols]
+               protections["relro"] = (
+                "Full" if elf.has_full_relro else
+                "Partial" if elf.has_partial_relro else
+                "None"
+            )
+            # stripped 
+               symtab = elf.get_section(".symtab")
+               results["stripped"] = (
+                "Non-Stripped" if symtab and len(elf.symbols) > 0 else "Stripped"
+            )
+            # linking 
+               results["linking"] = "Dynamic" if elf.libraries else "Static"
+ 
+
 
 def main():
   parser = ArgumentParser(description="File Analyzer")
