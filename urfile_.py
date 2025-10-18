@@ -1,4 +1,4 @@
-from  argparse import ArgumentParser,FileType
+from  argparse import ArgumentParser
 from pathlib import Path 
 import zipfile
 import magic 
