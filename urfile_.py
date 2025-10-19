@@ -250,6 +250,17 @@ def detect_protection(file):
             # Stripped / Non-Stripped
             protections["stripped"] = "Non-Stripped" if pe.has_debug else "Stripped"
 
+   
+  # ;; Packed (UPX etc.) ;;
+          section_names = [sec.name.lower() for sec in binary.sections]
+          if any("upx" in name for name in section_names):
+              protections["packed"] = True
+
+      except Exception as e:
+              protections["error"] = str(e)
+
+      return  protections
+
 
 def main():
   parser = ArgumentParser(description="File Analyzer")
