@@ -231,7 +231,24 @@ def detect_protection(file):
             )
             # linking 
                results["linking"] = "Dynamic" if elf.libraries else "Static"
- 
+# ;; Windows PE ;;
+
+          elif ftype == "PE":
+            pe = binary
+            dllchars = pe.optional_header.dll_characteristics_lists
+            protections["pie"] = "DYNAMIC_BASE" in dllchars
+            protections["aslr"] = "DYNAMIC_BASE" in dllchars
+            protections["nx"] = "NX_COMPAT" in dllchars
+            # Canary detection (heuristic)
+            names = [imp.name for lib in pe.imports for imp in lib.entries if imp.name]
+            protections["canary"] = any(
+                "__security_cookie" in n or "__stack_chk_fail" in n
+                for n in names
+            )
+  # Linking type
+            protections["linking"] = "Dynamic" if pe.imports else "Static"
+            # Stripped / Non-Stripped
+            protections["stripped"] = "Non-Stripped" if pe.has_debug else "Stripped"
 
 
 def main():
