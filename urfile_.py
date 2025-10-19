@@ -266,10 +266,12 @@ def detect_protection(file):
 def main():
   parser = ArgumentParser(description="File Analyzer")
   parser.add_argument("file",type=Path,help="Path of your file ")
-  args =  parser.parse_args()
+  parser.add_argument("--protections",action="store_true",help="Show only binary protection information")
+
+  args = parser.parse_args() 
   if not args.file.exists():
-        print(f"Error: File '{args.file}' not found.")
-        return
+      print(f"Error: File '{args.file}' not found.")
+      return
  
   file = Urfile_(str(args.file))
   file.file_type() 
@@ -287,32 +289,32 @@ def main():
   print(f"Language      : {results.get('language', 'Unknown')}")
 
 
+  if args.protections:
+   print("\n[+] Binary Protections")
+   prot = results.get("protections", {})
+   labels = {
+         "pie": "PIE",
+         "nx": "NX",
+         "relro": "RELRO",
+         "canary": "Canary",
+          "aslr": "ASLR",
+         "packed": "Packed",
+         "stripped": "Stripped",
+         "linking": "Linking Type",
+     }
 
-  print("\n[+] Binary Protections")
-  prot = results.get("protections", {})
-  labels = {
-        "pie": "PIE",
-        "nx": "NX",
-        "relro": "RELRO",
-        "canary": "Canary",
-        "aslr": "ASLR",
-        "packed": "Packed",
-        "stripped": "Stripped",
-        "linking": "Linking Type",
-    }
-
-  for key, label in labels.items():
-        val = prot.get(key, None)
-        if val is True:
-            val = "Enabled"
-        elif val is False:
-            val = "Disabled"
-        elif val is None:
-            val = "Unknown"
-        elif isinstance(val, str):
-            # capitalize nice labels like "Full", "Static", etc.
-            val = val.replace("_", " ").title()
-        print(f"   {label:<14}: {val}")
+   for key, label in labels.items():
+         val = prot.get(key, None)
+         if val is True:
+             val = "Enabled"
+         elif val is False:
+             val = "Disabled"
+         elif val is None:
+             val = "Unknown"
+         elif isinstance(val, str):
+             # capitalize nice labels like "Full", "Static", etc.
+             val = val.replace("_", " ").title()
+         print(f"   {label:<14}: {val}")
 
    
 
