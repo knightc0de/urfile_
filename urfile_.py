@@ -191,6 +191,7 @@ class Urfile_():
           
           return self.results
       
+
 #;; protection & linking analysis ;; 
 
 def detect_protection(file):
@@ -273,9 +274,61 @@ def main():
   file = Urfile_(str(args.file))
   file.file_type() 
   results = file.detecting_binary() 
+  protections = detect_protection(str(args.file))
+  if protections:
+        results["protections"] = protections
+  
+  print("\n[+] File Report ")
+  print(f"File Path     : {args.file}")
+  print(f"File Type     : {results.get('file_type', 'Unknown')}")
+  print(f"Architecture  : {results.get('architecture', 'Unknown')}")
+  print(f"Executable    : {results.get('executable', 'False')}")
+  print(f"Encoding      : {results.get('encoding', 'Unknown')}")
+  print(f"Language      : {results.get('language', 'Unknown')}")
 
-  for k, v in results.items():
-    print(f"{k:15}: {v}")
+
+
+  print("\n[+] Binary Protections")
+  prot = results.get("protections", {})
+  labels = {
+        "pie": "PIE",
+        "nx": "NX",
+        "relro": "RELRO",
+        "canary": "Canary",
+        "aslr": "ASLR",
+        "packed": "Packed",
+        "stripped": "Stripped",
+        "linking": "Linking Type",
+    }
+
+  for key, label in labels.items():
+        val = prot.get(key, None)
+        if val is True:
+            val = "Enabled"
+        elif val is False:
+            val = "Disabled"
+        elif val is None:
+            val = "Unknown"
+        elif isinstance(val, str):
+            # capitalize nice labels like "Full", "Static", etc.
+            val = val.replace("_", " ").title()
+        print(f"   {label:<14}: {val}")
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+  #for k, v in results.items():
+   # print(f"{k:15}: {v}")
 
 
 
