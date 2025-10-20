@@ -286,8 +286,9 @@ def main():
   print(f"Architecture  : {results.get('architecture', 'Unknown')}")
   print(f"Executable    : {results.get('executable', 'False')}")
   print(f"Encoding      : {results.get('encoding', 'Unknown')}")
-  print(f"Language      : {results.get('language', 'Unknown')}")
+  print(f"Language      : {results.get('language', 'Unknown')}\n")
 
+#;; Output ;;
 
   if args.protections:
    print("\n[+] Binary Protections")
