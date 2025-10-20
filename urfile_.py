@@ -219,6 +219,27 @@ def detect_packer_(data):
     if b"PACKED" in upper:
        return True,"Packed/Unkown"
     return False,None
+
+def linking_and_stripped(path,data,ftype_):
+    linking = None
+    stripped = None
+    upper = data.upper()
+
+    if ftype_ and "PE" in ftype_.upper():
+        if any(dll in upper for dll in pe_dllds):
+            linking = "Dynamic"
+        else:
+            linking = "Static"
+        if b"RSDS" in data or b".PDB"  in upper or b".DEBUG_" in upper:
+            stripped = "Non-stripped"
+        else:
+            stripped = "Stripped"
+    elif ftype_ and "ELF" in ftype_.upper():
+         if any(tok in upper for tok in elf_dynamic_):
+             linking = "Dynamic"
+         else: 
+             linking = "Static"  
+
             
 
 def detect_protection(file):
