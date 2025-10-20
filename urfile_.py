@@ -1,6 +1,7 @@
 from  argparse import ArgumentParser
 from pathlib import Path 
 import lief 
+import re
 import zipfile
 import magic 
 import struct 
