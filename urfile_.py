@@ -240,8 +240,11 @@ def linking_and_stripped(path,data,ftype_):
              linking = "Dynamic"
          else: 
              linking = "Static"  
-
-            
+         if  b".debug_info" in data or b".symtab" in data or    b".debug_str" in data:
+             stripped = "Non_Stripped"
+         else:
+             stripped = "Stripped"
+    
 
 def detect_protection(file):
       protections = {
