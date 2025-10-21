@@ -245,7 +245,17 @@ def linking_and_stripped(path,data,ftype_):
          else:
              stripped = "Stripped"
     
-
+    else:
+         if any (dll in upper for dll in pe_dllds):
+             linking = "Dynamic"
+         else:
+             linking = "Unknown"
+         if any(sym in upper for sym in [b"RSDS", b".PDB",b".DEBUG_INFO",b".SYMTAB"]):
+            stripped = "Non-Stripped"
+         else:
+             stripped = "Unknown"
+    return linking,stripped
+         
 def detect_protection(file):
       protections = {
           "pie": False,
