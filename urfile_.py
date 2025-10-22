@@ -254,9 +254,10 @@ def linking_and_stripped(path,data,ftype_):
             stripped = "Non-Stripped"
          else:
              stripped = "Unknown"
+
     return linking,stripped
          
-def detect_protection(file):
+def detect_protection(file,_lief=True):
       protections = {
           "pie": False,
           "nx": None,
@@ -267,65 +268,38 @@ def detect_protection(file):
           "stripped": None,
           "linking": None,
            }
-
-      try:
-          binary = lief.parse(file)
-          if not binary:
-           return protections
-
-          ftype = binary.format.name  
-
-# ;; Linux Elf ;; 
-          if ftype == "ELF":
-               elf = binary
-               protections["pie"] = elf.is_pie
-               protections["aslr"] = elf.is_pie
-               protections["nx"] = elf.has_nx
-               protections["canary"] = "__stack_chk_fail" in [s.name for s in elf.symbols]
+   
+      raw_bytes= b""
+    # _lief  parsing 
+      if _lief:
+         try:
+            binary = lief.parse(file)      
+            if binary:
+               ftype = binary.format.name
+          
+            if ftype == "ELF":
+               protections["pie"] = binary.is_pie
+               protections["aslr"] = binary.is_pie
+               protections["nx"] = binary.has_nx
+               protections["canary"] = "__stack_chk_fail" in [s.name for s in binary.symbols]
                protections["relro"] = (
-                "Full" if elf.has_full_relro else
-                "Partial" if elf.has_partial_relro else
+                "Full" if binary.has_full_relro else
+                "Partial" if binary.has_partial_relro else
                 "None"
             )
-            # stripped 
-               symtab = elf.get_section(".symtab")
-               results["stripped"] = (
-                "Non-Stripped" if symtab and len(elf.symbols) > 0 else "Stripped"
-            )
-            # linking 
-               results["linking"] = "Dynamic" if elf.libraries else "Static"
-# ;; Windows PE ;;
+            symtab = binary.get_section(".symtab")
+            protections["stripped"] = "Non-stripped" if symtab and len(binary.symbols) > 0 else "Stripped" 
+            protections["linking"] = "Dynamic" if binary.libraries else "Static"
 
-          elif ftype == "PE":
-            pe = binary
-            dllchars = pe.optional_header.dll_characteristics_lists
-            protections["pie"] = "DYNAMIC_BASE" in dllchars
-            protections["aslr"] = "DYNAMIC_BASE" in dllchars
-            protections["nx"] = "NX_COMPAT" in dllchars
-            # Canary detection (heuristic)
-            names = [imp.name for lib in pe.imports for imp in lib.entries if imp.name]
-            protections["canary"] = any(
-                "__security_cookie" in n or "__stack_chk_fail" in n
-                for n in names
-            )
-  # Linking type
-            protections["linking"] = "Dynamic" if pe.imports else "Static"
-            # Stripped / Non-Stripped
-            protections["stripped"] = "Non-Stripped" if pe.has_debug else "Stripped"
-
-   
-  # ;; Packed (UPX etc.) ;;
-          section_names = [sec.name.lower() for sec in binary.sections]
-          if any("upx" in name for name in section_names):
-              protections["packed"] = True
-
-      except Exception as e:
-              protections["error"] = str(e)
-
-      return  protections
-
-
-def main():
+      elif ftype == "PE":
+           dllchar = binary.optional_header.dll_characteristics_lists
+           protections["pie"] = "Dynamic_BASE" in dllchar
+           protections["aslr"] = protections["pie"]
+           protections["nx"]  = "NX_COMPAT" in dllchar
+           try:
+               names = [imp.name for lib in binary.import for  imp in lib.entries if imp.name]
+           
+ def main():
   parser = ArgumentParser(description="File Analyzer")
   parser.add_argument("file",type=Path,help="Path of your file ")
   parser.add_argument("--protections",action="store_true",help="Show only binary protection information")
