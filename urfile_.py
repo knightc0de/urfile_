@@ -270,7 +270,7 @@ def detect_protection(file,_lief=True):
            }
    
       raw_bytes = b""
-    # _lief  parsing 
+    # ;; _lief  parsing ;; 
       if _lief:
          try:
               binary = lief.parse(file)      
@@ -304,7 +304,7 @@ def detect_protection(file,_lief=True):
                        protections["linking"] = "Dynamic" if binary.imports else "Static"
                        protections["stripped"] = "Non-Stripped" if getattr(binary, "has_debug", False) else "Stripped"
         
-#  UPX sections
+# ;; UPX sections ;;
                   try:
                       section_names = [sec.name.lower() for sec in binary.sections]
                       if any("upx" in name for name in section_names):
@@ -315,7 +315,7 @@ def detect_protection(file,_lief=True):
          except Exception as e :
              protections["lief_error"] = str(e) 
         
- # RAw bytes analysis            
+ # ;; RAw bytes analysis ;;           
       try:
           raw_bytes = read_bytes()
       except Exception:
@@ -331,7 +331,7 @@ def detect_protection(file,_lief=True):
       except Exception:
           pass
 
- # linking_stripped      
+ # ;; linking_stripped ;;      
       try:
           if not protections.get("linking") or protections["linking"] ==  "Unknown":
               linking,stripped = linking_and_stripped(file,raw_bytes,results.get("file_type"))
@@ -348,8 +348,10 @@ def detect_protection(file,_lief=True):
   parser = ArgumentParser(description="File Analyzer")
   parser.add_argument("file",type=Path,help="Path of your file ")
   parser.add_argument("--protections",action="store_true",help="Show only binary protection information")
-
+  parser.add_argument("--no-lief" , action="store_true",help="skip LIEF parser (fast mode)")
   args = parser.parse_args() 
+
+
   if not args.file.exists():
       print(f"Error: File '{args.file}' not found.")
       return
@@ -357,48 +359,33 @@ def detect_protection(file,_lief=True):
   file = Urfile_(str(args.file))
   file.file_type() 
   results = file.detecting_binary() 
-  protections = detect_protection(str(args.file))
-  if protections:
-        results["protections"] = protections
   
-  print("\n[+] File Report ")
-  print(f"File Path     : {args.file}")
-  print(f"File Type     : {results.get('file_type', 'Unknown')}")
-  print(f"Architecture  : {results.get('architecture', 'Unknown')}")
-  print(f"Executable    : {results.get('executable', 'False')}")
-  print(f"Encoding      : {results.get('encoding', 'Unknown')}")
-  print(f"Language      : {results.get('language', 'Unknown')}\n")
-
-#;; Output ;;
-
+  protections = detect_protection(str(args.file), _lief=not args.no_lief)
+  results["protections"] = protections 
+  # ;; --protection ;;
   if args.protections:
-   print("\n[+] Binary Protections")
-   prot = results.get("protections", {})
-   labels = {
-         "pie": "PIE",
-         "nx": "NX",
-         "relro": "RELRO",
-         "canary": "Canary",
-          "aslr": "ASLR",
-         "packed": "Packed",
-         "stripped": "Stripped",
-         "linking": "Linking Type",
-     }
-
-   for key, label in labels.items():
-         val = prot.get(key, None)
-         if val is True:
-             val = "Enabled"
-         elif val is False:
-             val = "Disabled"
-         elif val is None:
-             val = "Unknown"
-         elif isinstance(val, str):
-             # capitalize nice labels like "Full", "Static", etc.
-             val = val.replace("_", " ").title()
-         print(f"   {label:<14}: {val}")
+     print(f"\n[+] Binary Protections: {args.file}")
+     labels = [
+           ("pie": "PIE"),
+           ("nx": "NX"),
+           ("relro": "RELRO"),
+           ("canary": "Canary"),
+           ("aslr": "ASLR"),
+           ("packed": "Packed"),
+           ("stripped": "Stripped"),
+           ("linking": "Linking Type",)
+     ]
+     for key, label in labels:
+            val = protections.get(key)
+            if isinstance(val, bool):
+                val = "Yes" if val else "No"
+            elif val is None:
+                val = "Unknown"
+            print(f"  {label:<14}: {val}")
+     return
 
    
 
+   
 if __name__ == "__main__":
    main()
