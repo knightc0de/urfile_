@@ -272,7 +272,7 @@ def detect_protection(file,_lief=True):
       raw_bytes= b""
     # _lief  parsing 
       if _lief:
-         try:
+        try:
             binary = lief.parse(file)      
             if binary:
                ftype = binary.format.name
@@ -297,8 +297,28 @@ def detect_protection(file,_lief=True):
            protections["aslr"] = protections["pie"]
            protections["nx"]  = "NX_COMPAT" in dllchar
            try:
-               names = [imp.name for lib in binary.import for  imp in lib.entries if imp.name]
-           
+               names = [imp.name for lib in binary.imports for  imp in lib.entries if imp.name]
+           except Exception:
+                 names = [] 
+           protections["canary"] = any("__security_cookie" in (n or "").lower() or "__stack_chk_fail" in (n or "").lower() for n in names)
+           protections["linking"] = "Dynamic" if binary.imports else "Static"
+           protections["stripped"] = "Non-Stripped" if getattr(binary, "has_debug", False) else "Stripped"
+        
+#  UPX sections
+           try:
+               section_names = [sec.name.lower() for sec in binary.sections]
+               if any("upx" in name for name in section_names):
+                  protections["packed"] = True
+                  protections["packer_name"] = "UPX"
+           except Exception:
+                    pass   
+        
+         except Exception as e :
+                protections["lief_error"]  = str(e)
+    
+        
+             
+ 
  def main():
   parser = ArgumentParser(description="File Analyzer")
   parser.add_argument("file",type=Path,help="Path of your file ")
