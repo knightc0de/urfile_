@@ -269,7 +269,7 @@ def detect_protection(file,_lief=True):
           "linking": None,
            }
    
-      raw_bytes= b""
+      raw_bytes = b""
     # _lief  parsing 
       if _lief:
          try:
@@ -315,7 +315,34 @@ def detect_protection(file,_lief=True):
          except Exception as e :
              protections["lief_error"] = str(e) 
         
-             
+ # RAw bytes analysis            
+      try:
+          raw_bytes = read_bytes()
+      except Exception:
+          raw_bytes = b""
+ 
+      upper = raw_bytes()
+      
+      try:
+          is_packed,packer = detect_packer_(file)
+          if is_packed:
+              protections["packed"] = True
+              protections["packer_name"] = packer
+      except Exception:
+          pass
+
+ # linking_stripped      
+      try:
+          if not protections.get("linking") or protections["linking"] ==  "Unknown":
+              linking,stripped = linking_and_stripped(file,raw_bytes,results.get("file_type"))
+              protections["linking"] = linking or protections.get("linking","Unknown")
+              protections["stripped"] = stripped or protections.get("stripped","Unknown")
+      except Exception:
+          protections["linking"] = "Unkown"
+          protections["stripped"] = "Unkown"
+      
+      return  protections 
+ 
  
  def main():
   parser = ArgumentParser(description="File Analyzer")
