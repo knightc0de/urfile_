@@ -344,7 +344,7 @@ def detect_protection(file,_lief=True):
       return  protections 
  
  
- def main():
+def main():
   parser = ArgumentParser(description="File Analyzer")
   parser.add_argument("file",type=Path,help="Path of your file ")
   parser.add_argument("--protections",action="store_true",help="Show only binary protection information")
@@ -383,6 +383,15 @@ def detect_protection(file,_lief=True):
                 val = "Unknown"
             print(f"  {label:<14}: {val}")
      return
+ 
+ 
+# Full report
+  print(f"\n[+] File Report for: {args.file}\n")
+  print(f"File Type     : {results.get('file_type')}")
+  print(f"Architecture  : {results.get('architecture')}")
+  print(f"Executable    : {results.get('executable')}")
+  print(f"Encoding      : {results.get('encoding')}")
+  print(f"Language      : {results.get('language')}\n")
 
    
 
