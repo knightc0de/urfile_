@@ -400,6 +400,18 @@ def main():
         ("stripped", "Stripped"), ("linking", "Linking Type")
     ]:
 
+   val = protections.get(key)
+   if isinstance(val,bool):
+      val = "Yes" if val else "NO" 
+   elif val is None:
+       val = "Unknown"
+   print(f"  {label:<14}:{val}")  
+
+  if "lief _error" in protections:
+      print("\n[!] Note: LIEF parser failed while reading this binary.")
+      print(f"    Reason: {protections['lief_error']}")
+      print("    This may indicate the file is packed or corrupted.\n")
+
    
 if __name__ == "__main__":
    main()
