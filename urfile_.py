@@ -393,7 +393,12 @@ def main():
   print(f"Encoding      : {results.get('encoding')}")
   print(f"Language      : {results.get('language')}\n")
 
-   
+  print("[+] Binary Protections\n")
+  for key, label in [
+        ("pie", "PIE"), ("nx", "NX"), ("relro", "RELRO"), ("canary", "Canary"),
+        ("aslr", "ASLR"), ("packed", "Packed"), ("packer_name", "Packer"),
+        ("stripped", "Stripped"), ("linking", "Linking Type")
+    ]:
 
    
 if __name__ == "__main__":
