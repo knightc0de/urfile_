@@ -15,14 +15,14 @@ results = {
 }
 
 class Urfile_():
-      def __init__(self,Path):
-          self.path = Path 
+      def __init__(self,path):
+          self.path = Path(path) 
           self.results = results.copy()
       
       def file_type(self):
           try:
                m = magic.Magic(mime=False)
-               ftype = m.from_file(self.path)
+               ftype = m.from_file(str(self.path))
                ftype = ftype.split(",")[0].strip()
                self.results["file_type"] = ftype
                ext = Path(self.path).suffix.lower()
@@ -232,7 +232,7 @@ def linking_and_stripped(path,data,ftype_):
         else:
             linking = "Static"
         if b"RSDS" in data or b".PDB"  in upper or b".DEBUG_" in upper:
-            stripped = "Non-stripped"
+            stripped = "Non-Stripped"
         else:
             stripped = "Stripped"
     elif ftype_ and "ELF" in ftype_.upper():
@@ -241,7 +241,7 @@ def linking_and_stripped(path,data,ftype_):
          else: 
              linking = "Static"  
          if  b".debug_info" in data or b".symtab" in data or    b".debug_str" in data:
-             stripped = "Non_Stripped"
+             stripped = "Non-Stripped"
          else:
              stripped = "Stripped"
     
@@ -273,7 +273,7 @@ def detect_protection(file,_lief=True):
     # ;; _lief  parsing ;; 
       if _lief:
          try:
-              binary = lief.parse(file)      
+              binary = lief.parse(str(file))      
               if binary:
                   ftype = binary.format.name
           
@@ -288,12 +288,12 @@ def detect_protection(file,_lief=True):
                      "None"
                       )
                      symtab = binary.get_section(".symtab")
-                     protections["stripped"] = "Non-stripped" if symtab and len(binary.symbols) > 0 else "Stripped" 
+                     protections["stripped"] = "Non-Stripped" if symtab and len(binary.symbols) > 0 else "Stripped" 
                      protections["linking"] = "Dynamic" if binary.libraries else "Static"
 
                   elif ftype == "PE":
                        dllchar = binary.optional_header.dll_characteristics_lists
-                       protections["pie"] = "Dynamic_BASE" in dllchar
+                       protections["pie"] = "DYNAMIC_BASE" in dllchar
                        protections["aslr"] = protections["pie"]
                        protections["nx"]  = "NX_COMPAT" in dllchar
                        try:
@@ -317,14 +317,14 @@ def detect_protection(file,_lief=True):
         
  # ;; RAw bytes analysis ;;           
       try:
-          raw_bytes = read_bytes()
+          raw_bytes = read_bytes(str(file))
       except Exception:
           raw_bytes = b""
  
-      upper = raw_bytes()
+      upper = raw_bytes.upper()
       
       try:
-          is_packed,packer = detect_packer_(file)
+          is_packed,packer = detect_packer_(raw_bytes)
           if is_packed:
               protections["packed"] = True
               protections["packer_name"] = packer
@@ -362,18 +362,20 @@ def main():
   
   protections = detect_protection(str(args.file), _lief=not args.no_lief)
   results["protections"] = protections 
+  
   # ;; --protection ;;
+  
   if args.protections:
      print(f"\n[+] Binary Protections: {args.file}")
      labels = [
-           ("pie": "PIE"),
-           ("nx": "NX"),
-           ("relro": "RELRO"),
-           ("canary": "Canary"),
-           ("aslr": "ASLR"),
-           ("packed": "Packed"),
-           ("stripped": "Stripped"),
-           ("linking": "Linking Type",)
+           ("pie","PIE"),
+           ("nx", "NX"),
+           ("relro", "RELRO"),
+           ("canary", "Canary"),
+           ("aslr", "ASLR"),
+           ("packed", "Packed"),
+           ("stripped", "Stripped"),
+           ("linking", "Linking Type",)
      ]
      for key, label in labels:
             val = protections.get(key)
