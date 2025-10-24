@@ -412,7 +412,7 @@ def main():
   if "lief _error" in protections:
       print("\n[!] Note: LIEF parser failed while reading this binary.")
       print(f"    Reason: {protections['lief_error']}")
-      print("    This may indicate the file is packed or corrupted.\n")
+    
 
    
 if __name__ == "__main__":
