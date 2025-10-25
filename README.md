@@ -14,3 +14,13 @@
 
 - Magic-based inspection — Uses the python-magic library for precise MIME and content inspection
 
+# Requirements 
+```bash
+   pip install python-magic
+```
+
+## Usage
+> Run directly from the command line:
+``` bash  
+python urfile_.py <path_to_file>
+```
