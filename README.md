@@ -14,7 +14,7 @@
 
 - Magic-based inspection — Uses the python-magic library for precise MIME and content inspection
 
-# Requirements 
+### Requirements 
 ```bash
    pip install python-magic
 ```
@@ -24,3 +24,11 @@
 ``` bash  
 python urfile_.py <path_to_file>
 ```
+### Supported Formats
+- Category	Types Detected
+- Executables	Windows PE, Linux ELF, macOS Mach-O
+- Mobile	Android APK
+- Archives	ZIP, RAR, 7z, TAR, GZIP, BZIP2
+- Source Code	Python, C/C++, Java, JavaScript, PHP, Shell
+- Web	HTML, PHP
+- Other	Text, Binary
