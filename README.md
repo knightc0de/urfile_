@@ -1,4 +1,4 @@
-# 🧠 Urfile_ is a command line file Analyzer tool for windows.
+# 🧠 Urfile_ is a command line file Analyzer tool.
 
 ## Features
 
@@ -48,5 +48,10 @@ python urfile_.py <path_to_file>
 ```bash
 python urfile_.py /path/to/binary --protections
 ```
+> Fast mode (skip LIEF parsing)
+```bash
+python urfile_.py /path/to/file --no-lief
+```
+
 # 👨‍💻Author 
 ### @Knightc0de
