@@ -32,3 +32,6 @@ python urfile_.py <path_to_file>
 - Source Code	Python, C/C++, Java, JavaScript, PHP, Shell
 - Web	HTML, PHP
 - Other	Text, Binary
+
+# 🧑‍💻 Author 
+@knightc0de
