@@ -9,7 +9,7 @@ import struct
 results = {
            "file_type" : "Unknown",
            "architecture" : "Unknown", 
-           "executable"   : "False",
+           "executable"   :  False,
            "encoding"     :  "Unknown",
            "language"     : "Unknown",
 }
@@ -94,7 +94,7 @@ class Urfile_():
 
            
 # ;; Linux Shared Object (.so) ;;
-          elif self.path.lower().endswith(".so"):
+          elif self.path.suffix.lower() == ".so": 
              if header[:4] == b"\x7fELF":
                 self.results["file_type"] = "Linux Shared Object (.so)"
                 self.results["executable"] = True
@@ -126,7 +126,7 @@ class Urfile_():
                self.results["file_type"] = "BZIP2 Archive (.bz2)"
                self.results["executable"] = False
 # ;; TAR ;;
-          elif self.path.lower().endswith(".tar"):
+          elif self.path.suffix.lower() == ".tar":
              with open(self.path, "rb") as f:
                   data = f.read(512)
                   if b"ustar" in data:
@@ -257,7 +257,7 @@ def linking_and_stripped(path,data,ftype_):
 
     return linking,stripped
          
-def detect_protection(file,_lief=True):
+def detect_protection(file,ftype_,_lief=True):
       protections = {
           "pie": False,
           "nx": None,
@@ -360,12 +360,22 @@ def main():
   file.file_type() 
   results = file.detecting_binary() 
   
-  protections = detect_protection(str(args.file), _lief=not args.no_lief)
-  results["protections"] = protections 
+  executable = results.get("executable",False)
+  protections = None 
   
+  if executable:
+        protections = detect_protection(str(args.file), results.get("file_type"), _lief=not args.no_lief)
+        results["protections"] = protections 
+ 
+
   # ;; --protection ;;
   
   if args.protections:
+     if not executable:
+            print(f"\n[-] File '{args.file}' is not an executable binary :")
+            return
+
+     
      print(f"\n[+] Binary Protections: {args.file}")
      labels = [
            ("pie","PIE"),
@@ -395,24 +405,29 @@ def main():
   print(f"Encoding      : {results.get('encoding')}")
   print(f"Language      : {results.get('language')}\n")
 
-  print("[+] Binary Protections\n")
-  for key, label in [
-        ("pie", "PIE"), ("nx", "NX"), ("relro", "RELRO"), ("canary", "Canary"),
-        ("aslr", "ASLR"), ("packed", "Packed"), ("packer_name", "Packer"),
-        ("stripped", "Stripped"), ("linking", "Linking Type")
-    ]:
 
-   val = protections.get(key)
-   if isinstance(val,bool):
-      val = "Yes" if val else "NO" 
-   elif val is None:
-       val = "Unknown"
-   print(f"  {label:<14}:{val}")  
+  if executable and protections:
+     print("[+] Binary Protections\n")
+     for key, label in [
+           ("pie", "PIE"), ("nx", "NX"), ("relro", "RELRO"), ("canary", "Canary"),
+           ("aslr", "ASLR"), ("packed", "Packed"), ("packer_name", "Packer"),
+           ("stripped", "Stripped"), ("linking", "Linking Type")
+      ]:
 
-  if "lief _error" in protections:
-      print("\n[!] Note: LIEF parser failed while reading this binary.")
-      print(f"    Reason: {protections['lief_error']}")
-    
+        val = protections.get(key)
+        if isinstance(val,bool):
+           val = "Yes" if val else "NO" 
+        elif val is None:
+             val = "Unknown"
+        print(f"  {label:<14}:{val}")  
+
+        if "lief_error" in protections:
+            print("\n[!] Note: LIEF parser failed while reading this binary.")
+            print(f"    Reason: {protections['lief_error']}")
+  else:
+        print("[-] File '{args.file}' is not an executable binary : ")
+
+     
 
    
 if __name__ == "__main__":
